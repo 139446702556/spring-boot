@@ -69,13 +69,21 @@ public final class ConfigurationPropertySources {
 	 * @see #get(Environment)
 	 */
 	public static void attach(Environment environment) {
+		//断言给定的environment变量为ConfigurableEnvironment类型
 		Assert.isInstanceOf(ConfigurableEnvironment.class, environment);
+		//获取environment的PropertySources属性
 		MutablePropertySources sources = ((ConfigurableEnvironment) environment).getPropertySources();
+		//从sources中获取key为ATTACHED_PROPERTY_SOURCE_NAME的PropertySource对象
 		PropertySource<?> attached = sources.get(ATTACHED_PROPERTY_SOURCE_NAME);
+		//如果获取到的attached不为空，并且其与sources对象不同；则置空attached
+		// 并且从sources中移除key为ATTACHED_PROPERTY_SOURCE_NAME的属性值（此处操作便于后续逻辑执行操作）
 		if (attached != null && attached.getSource() != sources) {
 			sources.remove(ATTACHED_PROPERTY_SOURCE_NAME);
 			attached = null;
 		}
+		//如果attached为空（两种情况：1、当前environment的PropertySource集合中不存在当前key的值
+		// 2、存在当前key的值，但是此值和sources对象步相同），则需要根绝当前sources对象重新创建PropertySources对象
+		//并将其添加到sources中
 		if (attached == null) {
 			sources.addFirst(new ConfigurationPropertySourcesPropertySource(ATTACHED_PROPERTY_SOURCE_NAME,
 					new SpringConfigurationPropertySources(sources)));

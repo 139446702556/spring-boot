@@ -70,9 +70,12 @@ public class ApplicationConversionService extends FormattingConversionService {
 	 * binary compatibility.
 	 * @return the shared {@code ApplicationConversionService} instance (never
 	 * {@code null})
+	 * 获取共享的ConversionService类的实例化对象
 	 */
 	public static ConversionService getSharedInstance() {
+		//获取共享的ConversionService的实例化对象
 		ApplicationConversionService sharedInstance = ApplicationConversionService.sharedInstance;
+		//如果全局对象为空，则使用双重检查锁的方式对其进行创建
 		if (sharedInstance == null) {
 			synchronized (ApplicationConversionService.class) {
 				sharedInstance = ApplicationConversionService.sharedInstance;

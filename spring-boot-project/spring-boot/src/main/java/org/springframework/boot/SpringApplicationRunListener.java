@@ -32,6 +32,7 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
  * @author Dave Syer
  * @author Andy Wilkinson
  * @since 1.0.0
+ * SpringApplication运行的监听器接口
  */
 public interface SpringApplicationRunListener {
 

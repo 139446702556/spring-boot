@@ -42,19 +42,22 @@ import org.springframework.util.ErrorHandler;
  * @author Andy Wilkinson
  * @author Artsiom Yudovin
  * @since 1.0.0
+ * 此类用于将SpringApplicationRunListener监听到的事件转换为对应的SpringApplicationEvent事件，发布到监听器们
  */
 public class EventPublishingRunListener implements SpringApplicationRunListener, Ordered {
-
+	/**spring应用*/
 	private final SpringApplication application;
-
+	/**参数集合*/
 	private final String[] args;
-
+	/**事件广播器*/
 	private final SimpleApplicationEventMulticaster initialMulticaster;
 
 	public EventPublishingRunListener(SpringApplication application, String[] args) {
 		this.application = application;
 		this.args = args;
+		//创建SimpleApplicationEventMulticaster对象
 		this.initialMulticaster = new SimpleApplicationEventMulticaster();
+		//添加应用的监听器们到initialMulticaster中
 		for (ApplicationListener<?> listener : application.getListeners()) {
 			this.initialMulticaster.addApplicationListener(listener);
 		}
