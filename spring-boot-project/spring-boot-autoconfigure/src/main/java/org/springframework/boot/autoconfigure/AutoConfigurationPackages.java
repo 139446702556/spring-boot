@@ -41,7 +41,7 @@ import org.springframework.util.StringUtils;
 /**
  * Class for storing auto-configuration packages for reference later (e.g. by JPA entity
  * scanner).
- *
+ * 此类用于将使用@AutoConfigurationPackage注解的类所在的包中组件注册成一个spring ioc容器中的Bean
  * @author Phillip Webb
  * @author Dave Syer
  * @author Oliver Gierke
@@ -56,6 +56,7 @@ public abstract class AutoConfigurationPackages {
 	/**
 	 * Determine if the auto-configuration base packages for the given bean factory are
 	 * available.
+	 * 判断在传入的容器中是否存在该BEAN
 	 * @param beanFactory the source bean factory
 	 * @return true if there are auto-config packages available
 	 */
@@ -65,6 +66,7 @@ public abstract class AutoConfigurationPackages {
 
 	/**
 	 * Return the auto-configuration base packages for the given bean factory.
+	 * 从给定的容器中获取该BEAN的值
 	 * @param beanFactory the source bean factory
 	 * @return a list of auto-configuration packages
 	 * @throws IllegalStateException if auto-configuration is not enabled
@@ -86,26 +88,36 @@ public abstract class AutoConfigurationPackages {
 	 * you don't call this method directly, but instead rely on the default convention
 	 * where the package name is set from your {@code @EnableAutoConfiguration}
 	 * configuration class or classes.
+	 * 注册一个用于存储包名的bean对象到spring ioc容器中
 	 * @param registry the bean definition registry
 	 * @param packageNames the package names to set
 	 */
 	public static void register(BeanDefinitionRegistry registry, String... packageNames) {
+		//如果当前spring ioc容器中已经存在了名称为BEAN的Bean对象，则修改其包属性
 		if (registry.containsBeanDefinition(BEAN)) {
+			//从容器中获取该BEAN对应的BeanDefinition对象
 			BeanDefinition beanDefinition = registry.getBeanDefinition(BEAN);
+			//修改此BeanDefinition对象的ConstructorArgumentValues属性值
 			ConstructorArgumentValues constructorArguments = beanDefinition.getConstructorArgumentValues();
 			constructorArguments.addIndexedArgumentValue(0, addBasePackages(constructorArguments, packageNames));
 		}
+		//如果当前ioc容器中不存在该BEAN对应的对象，则创建一个Bean对象，并进行注册
 		else {
+			//创建GenericBeanDefinition对象
 			GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
+			//设置beanDefinition对象的相关属性
 			beanDefinition.setBeanClass(BasePackages.class);
 			beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, packageNames);
 			beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			//将新创建的beanDefinition对象（AutoConfigurationPackages类型对象）注册到spring ioc容器中
 			registry.registerBeanDefinition(BEAN, beanDefinition);
 		}
 	}
-
+	/**合并package的逻辑*/
 	private static String[] addBasePackages(ConstructorArgumentValues constructorArguments, String[] packageNames) {
+		//获取已经存在的参数值集合对象
 		String[] existing = (String[]) constructorArguments.getIndexedArgumentValue(0, String[].class).getValue();
+		//进行合并
 		Set<String> merged = new LinkedHashSet<>();
 		merged.addAll(Arrays.asList(existing));
 		merged.addAll(Arrays.asList(packageNames));
@@ -115,6 +127,7 @@ public abstract class AutoConfigurationPackages {
 	/**
 	 * {@link ImportBeanDefinitionRegistrar} to store the base package from the importing
 	 * configuration.
+	 * 注册器，用于处理@AutoConfigurationPackage注解
 	 */
 	static class Registrar implements ImportBeanDefinitionRegistrar, DeterminableImports {
 
@@ -132,9 +145,10 @@ public abstract class AutoConfigurationPackages {
 
 	/**
 	 * Wrapper for a package import.
+	 * 用于获得包名（用于包导入的包装器）
 	 */
 	private static final class PackageImport {
-
+		/**包名*/
 		private final String packageName;
 
 		PackageImport(AnnotationMetadata metadata) {
@@ -167,11 +181,12 @@ public abstract class AutoConfigurationPackages {
 
 	/**
 	 * Holder for the base package (name may be null to indicate no scanning).
+	 * 基础包的支架
 	 */
 	static final class BasePackages {
-
+		/**包名的集合*/
 		private final List<String> packages;
-
+		/**是否不打印BasePackage的基础日志信息*/
 		private boolean loggedBasePackageInfo;
 
 		BasePackages(String... names) {

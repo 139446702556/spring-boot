@@ -39,6 +39,9 @@ import org.springframework.core.annotation.AliasFor;
  * @author Phillip Webb
  * @author Andy Wilkinson
  * @since 1.4.0
+ * 此注解为spring boot自定义注解，因为其上标有@Configuration注解，所以其功能
+ * 与此注解一致，可以将类声明为一个配置类，此类中的所有被@Bean注解标记的方法返回的
+ * 实例都会被纳入spring容器中，并且实例名就是方法名
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

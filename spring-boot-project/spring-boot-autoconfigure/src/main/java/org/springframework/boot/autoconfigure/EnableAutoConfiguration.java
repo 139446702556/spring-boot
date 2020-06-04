@@ -74,6 +74,7 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
  * @see ConditionalOnClass
  * @see AutoConfigureAfter
  * @see SpringBootApplication
+ * 此注解的功能用于开启自动配置功能，是spring-boot-autoconfigure项目最核心的功能
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

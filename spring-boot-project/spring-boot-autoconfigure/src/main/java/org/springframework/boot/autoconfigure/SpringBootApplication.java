@@ -44,6 +44,12 @@ import org.springframework.data.repository.Repository;
  * @author Stephane Nicoll
  * @author Andy Wilkinson
  * @since 1.2.0
+ * 此注解为一个组合注解，其不仅能够表示当前程序是一个spring boot应用
+ * 还可以开启一些与spring boot相关的功能，如：开启自动配置
+ *
+ * @Inherited注解：此注解为java的基础注解，此注解标注的自定义注解当用在父类上的时候
+ * 子类会自动继承此注解；而使用到除了类以外的上面，则子类不会继承此注解（如方法，属性）
+ * @ComponentScan注解：此注解为spring自定义注解，扫描指定路径下的Component（如@Component、@Service、@Configuration等注解标注的类）
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
