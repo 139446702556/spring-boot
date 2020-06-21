@@ -31,12 +31,12 @@ import org.springframework.util.StringUtils;
 /**
  * A message associated with a {@link ConditionOutcome}. Provides a fluent builder style
  * API to encourage consistency across all condition messages.
- *
+ * 条件匹配结果的日志消息
  * @author Phillip Webb
  * @since 1.4.1
  */
 public final class ConditionMessage {
-
+	/**匹配消息*/
 	private String message;
 
 	private ConditionMessage() {

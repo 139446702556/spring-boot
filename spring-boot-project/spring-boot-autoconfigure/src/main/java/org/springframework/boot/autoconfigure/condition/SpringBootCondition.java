@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Greg Turnquist
  * @since 1.0.0
+ * spring boot Condition的抽象基类，主要用于提供相应的日志，帮助开发者判断哪些被进行加载
  */
 public abstract class SpringBootCondition implements Condition {
 
@@ -42,11 +43,16 @@ public abstract class SpringBootCondition implements Condition {
 
 	@Override
 	public final boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+		//获得被当前给定注解标注的类名或者方法名
 		String classOrMethodName = getClassOrMethodName(metadata);
 		try {
+			//条件匹配结果
 			ConditionOutcome outcome = getMatchOutcome(context, metadata);
+			//打印匹配结果
 			logOutcome(classOrMethodName, outcome);
+			//记录匹配得到的相关信息
 			recordEvaluation(context, classOrMethodName, outcome);
+			//返回是否匹配
 			return outcome.isMatch();
 		}
 		catch (NoClassDefFoundError ex) {
@@ -71,24 +77,29 @@ public abstract class SpringBootCondition implements Condition {
 		}
 		return metadata.toString();
 	}
-
+	/**获得当前被注解标注的类名或者方法名*/
 	private static String getClassOrMethodName(AnnotatedTypeMetadata metadata) {
+		//类
 		if (metadata instanceof ClassMetadata) {
 			ClassMetadata classMetadata = (ClassMetadata) metadata;
 			return classMetadata.getClassName();
 		}
+		//方法
 		MethodMetadata methodMetadata = (MethodMetadata) metadata;
 		return methodMetadata.getDeclaringClassName() + "#" + methodMetadata.getMethodName();
 	}
-
+	/**打印结果日志*/
 	protected final void logOutcome(String classOrMethodName, ConditionOutcome outcome) {
+		//开启了Trace级别的日志开关，则打印trace级别日志
 		if (this.logger.isTraceEnabled()) {
 			this.logger.trace(getLogMessage(classOrMethodName, outcome));
 		}
 	}
-
+	/**拼接日志要打印出的信息*/
 	private StringBuilder getLogMessage(String classOrMethodName, ConditionOutcome outcome) {
+		//存储日志打印信息
 		StringBuilder message = new StringBuilder();
+		//进行日志拼接，并返回拼接结果
 		message.append("Condition ");
 		message.append(ClassUtils.getShortName(getClass()));
 		message.append(" on ");
@@ -100,7 +111,7 @@ public abstract class SpringBootCondition implements Condition {
 		}
 		return message;
 	}
-
+	/**记录相关信息到ConditionEvaluationReport中*/
 	private void recordEvaluation(ConditionContext context, String classOrMethodName, ConditionOutcome outcome) {
 		if (context.getBeanFactory() != null) {
 			ConditionEvaluationReport.get(context.getBeanFactory()).recordConditionEvaluation(classOrMethodName, this,
@@ -118,6 +129,7 @@ public abstract class SpringBootCondition implements Condition {
 
 	/**
 	 * Return true if any of the specified conditions match.
+	 * 如果任何指定条件匹配，则返回true（即所有指定条件中，只要有一个匹配的，就返回true）
 	 * @param context the context
 	 * @param metadata the annotation meta-data
 	 * @param conditions conditions to test
@@ -125,7 +137,9 @@ public abstract class SpringBootCondition implements Condition {
 	 */
 	protected final boolean anyMatches(ConditionContext context, AnnotatedTypeMetadata metadata,
 			Condition... conditions) {
+		//遍历所有指定的Condition
 		for (Condition condition : conditions) {
+			//进行匹配
 			if (matches(context, metadata, condition)) {
 				return true;
 			}
@@ -135,15 +149,18 @@ public abstract class SpringBootCondition implements Condition {
 
 	/**
 	 * Return true if any of the specified condition matches.
+	 * 如果任何指定条件匹配，则返回true
 	 * @param context the context
 	 * @param metadata the annotation meta-data
 	 * @param condition condition to test
 	 * @return {@code true} if the condition matches.
 	 */
 	protected final boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata, Condition condition) {
+		//如果指定条件是SpringBoot的条件类型对象，则进行其直接匹配方法（无需记录日志）
 		if (condition instanceof SpringBootCondition) {
 			return ((SpringBootCondition) condition).getMatchOutcome(context, metadata).isMatch();
 		}
+		//否者，其它类型的条件对象，直接调用其匹配方法
 		return condition.matches(context, metadata);
 	}
 

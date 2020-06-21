@@ -21,15 +21,15 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Outcome for a condition match, including log message.
- *
+ * 条件匹配的结果，包括日志消息
  * @author Phillip Webb
  * @since 1.0.0
  * @see ConditionMessage
  */
 public class ConditionOutcome {
-
+	/**匹配结果*/
 	private final boolean match;
-
+	/**匹配消息*/
 	private final ConditionMessage message;
 
 	/**

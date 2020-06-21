@@ -35,14 +35,18 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
  */
 @Order(Ordered.HIGHEST_PRECEDENCE + 20)
 class OnJavaCondition extends SpringBootCondition {
-
+	/**当前使用的jvm的java版本*/
 	private static final JavaVersion JVM_VERSION = JavaVersion.getJavaVersion();
 
 	@Override
 	public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
+		//获取ConditionalOnJava注解中的属性
 		Map<String, Object> attributes = metadata.getAnnotationAttributes(ConditionalOnJava.class.getName());
+		//获取注解中的range属性值
 		Range range = (Range) attributes.get("range");
+		//获取注解中的value属性值
 		JavaVersion version = (JavaVersion) attributes.get("value");
+		//匹配版本，并返回匹配结果
 		return getMatchOutcome(range, JVM_VERSION, version);
 	}
 

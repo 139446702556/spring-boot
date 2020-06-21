@@ -268,35 +268,53 @@ public class AutoConfigurationImportSelector implements DeferredImportSelector, 
 	}
 
 	private List<String> filter(List<String> configurations, AutoConfigurationMetadata autoConfigurationMetadata) {
+		//记录开始执行的时间，用于下面来统计执行消耗的时间
 		long startTime = System.nanoTime();
+		//集合转化为数组
 		String[] candidates = StringUtils.toStringArray(configurations);
+		//每个配置类是否需要忽略的数组，通过下标来互相索引
 		boolean[] skip = new boolean[candidates.length];
+		//是否有需要忽略的
 		boolean skipped = false;
+		//遍历AutoConfigurationImportFilter数组（此数组是通过在加载META-INF/spring.factories文件中定义的实现类得到的），进行逐个匹配
 		for (AutoConfigurationImportFilter filter : getAutoConfigurationImportFilters()) {
+			//通过filter对象类实现Aware接口来设置其的属性们（Aware机制）
 			invokeAwareMethods(filter);
+			//执行批量匹配，返回匹配结果集
 			boolean[] match = filter.match(candidates, autoConfigurationMetadata);
+			//遍历匹配结果，判断哪些自动配置类需要被忽略
 			for (int i = 0; i < match.length; i++) {
+				//如果当前不匹配
 				if (!match[i]) {
+					//标记当前对应的配置类可以忽略，无需加载
 					skip[i] = true;
+					//标记为空，循环下一次就无需再去匹配它
 					candidates[i] = null;
+					//标记为存在不需要匹配的
 					skipped = true;
 				}
 			}
 		}
+		//如果没有需要忽略加载的配置类，则直接返回configurations
 		if (!skipped) {
 			return configurations;
 		}
+		//如果存在需要忽略的配置类，则创建新的集合，排除掉忽略的
 		List<String> result = new ArrayList<>(candidates.length);
+		//遍历candidates数组
 		for (int i = 0; i < candidates.length; i++) {
+			//如果当前配置类不需要忽略，则将其添加到result中
 			if (!skip[i]) {
 				result.add(candidates[i]);
 			}
 		}
+		//打印执行消耗的时间和已经排除的数量
 		if (logger.isTraceEnabled()) {
 			int numberFiltered = configurations.size() - result.size();
 			logger.trace("Filtered " + numberFiltered + " auto configuration class in "
 					+ TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) + " ms");
 		}
+		//返回结果
 		return new ArrayList<>(result);
 	}
 

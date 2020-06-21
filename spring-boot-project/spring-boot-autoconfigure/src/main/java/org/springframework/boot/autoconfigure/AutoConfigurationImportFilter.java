@@ -25,6 +25,8 @@ import org.springframework.context.ResourceLoaderAware;
  * Filter that can be registered in {@code spring.factories} to limit the
  * auto-configuration classes considered. This interface is designed to allow fast removal
  * of auto-configuration classes before their bytecode is even read.
+ * 用于过滤掉无需自动引入的自动配置类
+ * 因为自动配置类有很多，如果将不需要使用的也加载到内存中，这是一种对内存的浪费
  * <p>
  * An {@link AutoConfigurationImportFilter} may implement any of the following
  * {@link org.springframework.beans.factory.Aware Aware} interfaces, and their respective
@@ -53,6 +55,8 @@ public interface AutoConfigurationImportFilter {
 	 * be imported. The returned array must be the same size as the incoming
 	 * {@code autoConfigurationClasses} parameter. Entries containing {@code false} will
 	 * not be imported.
+	 * 此方法用于匹配当前给定的自动配置类们需不需要引入
+	 * 其方法返回的结果数组与给定的自动配置类数组是一一对应的，false表示不需要引入，而true表示需要引入
 	 */
 	boolean[] match(String[] autoConfigurationClasses, AutoConfigurationMetadata autoConfigurationMetadata);
 

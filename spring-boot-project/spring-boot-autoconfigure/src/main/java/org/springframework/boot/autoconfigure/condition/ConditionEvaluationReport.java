@@ -179,15 +179,22 @@ public final class ConditionEvaluationReport {
 	 * @return an existing or new {@link ConditionEvaluationReport}
 	 */
 	public static ConditionEvaluationReport get(ConfigurableListableBeanFactory beanFactory) {
+		//加锁
 		synchronized (beanFactory) {
 			ConditionEvaluationReport report;
+			//判断当前给定的beanFactory容器中是否包含beanName为autoConfigurationReport的单例bean对象
+			//如果有则从容器中获取此bean对象
 			if (beanFactory.containsSingleton(BEAN_NAME)) {
 				report = beanFactory.getBean(BEAN_NAME, ConditionEvaluationReport.class);
 			}
+			//如果没有，则手动创建一个ConditionEvaluationReport对象，并将其注册到
+			//当前给定的beanFactory容器中的单例容器中
 			else {
 				report = new ConditionEvaluationReport();
 				beanFactory.registerSingleton(BEAN_NAME, report);
 			}
+			//通过判断给定beanFactory的父类容器中是否存在名为BEAN_NAME的bean对象
+			//如果存在，则将其设置为report对象的父类属性
 			locateParent(beanFactory.getParentBeanFactory(), report);
 			return report;
 		}
