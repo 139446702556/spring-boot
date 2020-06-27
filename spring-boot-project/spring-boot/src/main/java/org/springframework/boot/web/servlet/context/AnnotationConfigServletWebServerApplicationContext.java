@@ -45,7 +45,8 @@ import org.springframework.util.ClassUtils;
  * Note: In case of multiple {@code @Configuration} classes, later {@code @Bean}
  * definitions will override ones defined in earlier loaded files. This can be leveraged
  * to deliberately override certain bean definitions via an extra Configuration class.
- *
+ * 此类的两个功能：从指定的basePackages包中扫描beanDefinition们
+ * 从指定的annotatedClasses注解的配置类中，读取BeanDefinition们
  * @author Phillip Webb
  * @since 1.0.0
  * @see #register(Class...)
@@ -59,9 +60,9 @@ public class AnnotationConfigServletWebServerApplicationContext extends ServletW
 	private final AnnotatedBeanDefinitionReader reader;
 
 	private final ClassPathBeanDefinitionScanner scanner;
-
+	/**需要被reader读取的注册类们*/
 	private final Set<Class<?>> annotatedClasses = new LinkedHashSet<>();
-
+	/**需要被scanner扫描的基础包*/
 	private String[] basePackages;
 
 	/**
@@ -95,7 +96,9 @@ public class AnnotationConfigServletWebServerApplicationContext extends ServletW
 	 */
 	public AnnotationConfigServletWebServerApplicationContext(Class<?>... annotatedClasses) {
 		this();
+		//注册指定的注解的类们
 		register(annotatedClasses);
+		//初始化spring容器
 		refresh();
 	}
 
@@ -107,7 +110,9 @@ public class AnnotationConfigServletWebServerApplicationContext extends ServletW
 	 */
 	public AnnotationConfigServletWebServerApplicationContext(String... basePackages) {
 		this();
+		//设置指定要扫描的包路径
 		scan(basePackages);
+		//初始化spring容器
 		refresh();
 	}
 
@@ -189,19 +194,24 @@ public class AnnotationConfigServletWebServerApplicationContext extends ServletW
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		this.basePackages = basePackages;
 	}
-
+	/**此方法实现于AbstractApplicationContext抽象类中*/
 	@Override
 	protected void prepareRefresh() {
+		//清空scanner的缓存（在spring容器初始化前需要清空scanner的缓存，以便保证其能够根据配置的包进行重新加载）
 		this.scanner.clearCache();
+		//调用父类方法
 		super.prepareRefresh();
 	}
 
 	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+		//调用父类方法
 		super.postProcessBeanFactory(beanFactory);
+		//如果设置了basePackages，则扫描指定的包，并将得到的beanDefinition们注册到registry中
 		if (this.basePackages != null && this.basePackages.length > 0) {
 			this.scanner.scan(this.basePackages);
 		}
+		//注册指定的注解的类们对应的BeanDefinition到registry中
 		if (!this.annotatedClasses.isEmpty()) {
 			this.reader.register(ClassUtils.toClassArray(this.annotatedClasses));
 		}

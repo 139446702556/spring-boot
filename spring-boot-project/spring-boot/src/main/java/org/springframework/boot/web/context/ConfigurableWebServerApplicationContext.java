@@ -22,7 +22,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * SPI interface to be implemented by most if not all {@link WebServerApplicationContext
  * web server application contexts}. Provides facilities to configure the context, in
  * addition to the methods in the {WebServerApplicationContext} interface.
- *
+ * 实现此接口可以获得管理web server的能力
  * @author Phillip Webb
  * @since 2.0.0
  */
@@ -31,6 +31,7 @@ public interface ConfigurableWebServerApplicationContext
 
 	/**
 	 * Set the server namespace of the context.
+	 * 设置当前上下文中服务的命名空间
 	 * @param serverNamespace the server namespace
 	 * @see #getServerNamespace()
 	 */

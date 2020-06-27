@@ -31,6 +31,8 @@ import org.springframework.web.context.support.ServletContextAwareProcessor;
  *
  * @author Phillip Webb
  * @since 1.0.0
+ * 此类的主要作用是作为处理实现了ServletContextAware接口的bean，将servletContext的值通过aware接口的实现注入到
+ * 这个bean的对应属性中
  */
 public class WebApplicationContextServletContextAwareProcessor extends ServletContextAwareProcessor {
 

@@ -32,6 +32,7 @@ public interface WebServerApplicationContext extends ApplicationContext {
 	/**
 	 * Returns the {@link WebServer} that was created by the context or {@code null} if
 	 * the server has not yet been created.
+	 * 获得由当前上下文创建的WebServer对象，如果服务器尚未创建，则返回null
 	 * @return the web server
 	 */
 	WebServer getWebServer();
@@ -41,6 +42,7 @@ public interface WebServerApplicationContext extends ApplicationContext {
 	 * namespace has been set. Used for disambiguation when multiple web servers are
 	 * running in the same application (for example a management context running on a
 	 * different port).
+	 * 获取当前web server应用程序上下文中设置的命名空间，如果没有设置则返回null
 	 * @return the server namespace
 	 */
 	String getServerNamespace();
@@ -48,6 +50,7 @@ public interface WebServerApplicationContext extends ApplicationContext {
 	/**
 	 * Returns {@code true} if the specified context is a
 	 * {@link WebServerApplicationContext} with a matching server namespace.
+	 * 判断当前给定上下文容器中是否存在给定的server命名空间
 	 * @param context the context to check
 	 * @param serverNamespace the server namespace to match against
 	 * @return {@code true} if the server namespace of the context matches
