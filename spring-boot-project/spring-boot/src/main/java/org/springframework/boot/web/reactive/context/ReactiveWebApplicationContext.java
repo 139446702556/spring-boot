@@ -20,7 +20,7 @@ import org.springframework.context.ApplicationContext;
 
 /**
  * Interface to provide configuration for a reactive web application.
- *
+ * 为响应式web应用程序提供配置
  * @author Stephane Nicoll
  * @since 2.0.0
  */

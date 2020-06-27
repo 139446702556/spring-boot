@@ -116,6 +116,7 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 		if (this.disableMBeanRegistry) {
 			Registry.disableRegistry();
 		}
+		//创建Tomcat服务对象，并设置相关属性
 		Tomcat tomcat = new Tomcat();
 		File baseDir = (this.baseDirectory != null) ? this.baseDirectory : createTempDir("tomcat");
 		tomcat.setBaseDir(baseDir.getAbsolutePath());
@@ -129,8 +130,11 @@ public class TomcatReactiveWebServerFactory extends AbstractReactiveWebServerFac
 		for (Connector additionalConnector : this.additionalTomcatConnectors) {
 			tomcat.getService().addConnector(additionalConnector);
 		}
+		//通过给定的HttpHandler对象创建TomcatHttpHandlerAdapter对象
 		TomcatHttpHandlerAdapter servlet = new TomcatHttpHandlerAdapter(httpHandler);
+		//在tomcat容器启动之前，做相关配置工作，并设置Http请求的相关处理器
 		prepareContext(tomcat.getHost(), servlet);
+		//获取Tomcat相关WebServer，并返回
 		return getTomcatWebServer(tomcat);
 	}
 
