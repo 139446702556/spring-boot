@@ -274,7 +274,7 @@ public class SpringApplication {
 		this.primarySources = new LinkedHashSet<>(Arrays.asList(primarySources));
 		//设置webApplicationType属性（通过在当前上下文中看是否存在指定文件，来决定其对应的webApplicationType对象）
 		this.webApplicationType = WebApplicationType.deduceFromClasspath();
-		//初始化initializers属性
+		//获得ApplicationContextInitializer集合，并用其初始化initializers属性
 		setInitializers((Collection) getSpringFactoriesInstances(ApplicationContextInitializer.class));
 		//初始化listeners属性
 		setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));

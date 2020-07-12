@@ -48,6 +48,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Phillip Webb
  * @since 1.2.0
+ * 此类用于检查配置，报告错误的配置
  */
 public class ConfigurationWarningsApplicationContextInitializer
 		implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -56,6 +57,7 @@ public class ConfigurationWarningsApplicationContextInitializer
 
 	@Override
 	public void initialize(ConfigurableApplicationContext context) {
+		//注册ConfigurationWarningsPostProcessor到spring容器中
 		context.addBeanFactoryPostProcessor(new ConfigurationWarningsPostProcessor(getChecks()));
 	}
 
@@ -72,7 +74,7 @@ public class ConfigurationWarningsApplicationContextInitializer
 	 */
 	protected static final class ConfigurationWarningsPostProcessor
 			implements PriorityOrdered, BeanDefinitionRegistryPostProcessor {
-
+		/**check数组*/
 		private Check[] checks;
 
 		public ConfigurationWarningsPostProcessor(Check[] checks) {
@@ -90,6 +92,7 @@ public class ConfigurationWarningsApplicationContextInitializer
 
 		@Override
 		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+			//遍历check数组，执行校验逻辑，如果有错误，则进行warn日志打印
 			for (Check check : this.checks) {
 				String message = check.getWarning(registry);
 				if (StringUtils.hasLength(message)) {
@@ -109,6 +112,7 @@ public class ConfigurationWarningsApplicationContextInitializer
 
 	/**
 	 * A single check that can be applied.
+	 * 校验器
 	 */
 	@FunctionalInterface
 	protected interface Check {
@@ -124,11 +128,15 @@ public class ConfigurationWarningsApplicationContextInitializer
 
 	/**
 	 * {@link Check} for {@code @ComponentScan} on problematic package.
+	 *  此类用于检查是否使用了@ComponentScan注解指定了要扫描的指定包路径
 	 */
 	protected static class ComponentScanPackageCheck implements Check {
-
+		/**
+		 * 有问题的包名称集合
+		 * 即禁止使用@ComponentScan注解指定扫描这个集合中的包
+		 */
 		private static final Set<String> PROBLEM_PACKAGES;
-
+		/**初始化spring的系统包名加入禁止扫描集合中，禁止用户手动设置扫描此类包*/
 		static {
 			Set<String> packages = new HashSet<>();
 			packages.add("org.springframework");
@@ -138,22 +146,33 @@ public class ConfigurationWarningsApplicationContextInitializer
 
 		@Override
 		public String getWarning(BeanDefinitionRegistry registry) {
+			//获取要扫描的包集合
 			Set<String> scannedPackages = getComponentScanningPackages(registry);
+			//获得要扫描的包中，有问题的包名集合
 			List<String> problematicPackages = getProblematicPackages(scannedPackages);
+			//如果没有有问题的包，则直接返回null（不存在问题）
 			if (problematicPackages.isEmpty()) {
 				return null;
 			}
+			//如果存在包有问题，则返回错误提示信息
 			return "Your ApplicationContext is unlikely to start due to a @ComponentScan of "
 					+ StringUtils.collectionToDelimitedString(problematicPackages, ", ") + ".";
 		}
 
 		protected Set<String> getComponentScanningPackages(BeanDefinitionRegistry registry) {
+			//扫描的包的集合
 			Set<String> packages = new LinkedHashSet<>();
+			//获得所有注册到容器中的BeanDefinition的名字们
 			String[] names = registry.getBeanDefinitionNames();
+			//遍历names数组
 			for (String name : names) {
+				//获取指定name对应的BeanDefinition对象
 				BeanDefinition definition = registry.getBeanDefinition(name);
+				//如果此beanDefinition对象是AnnotatedBeanDefinition类型
 				if (definition instanceof AnnotatedBeanDefinition) {
+					//转换类型为AnnotatedBeanDefinition
 					AnnotatedBeanDefinition annotatedDefinition = (AnnotatedBeanDefinition) definition;
+					//如果有@ComponentScan注解，则将其添加到packages中
 					addComponentScanningPackages(packages, annotatedDefinition.getMetadata());
 				}
 			}
@@ -161,12 +180,16 @@ public class ConfigurationWarningsApplicationContextInitializer
 		}
 
 		private void addComponentScanningPackages(Set<String> packages, AnnotationMetadata metadata) {
+			//获得给定metadata对应的类中设置的@ComponentScan注解属性对象
 			AnnotationAttributes attributes = AnnotationAttributes
 					.fromMap(metadata.getAnnotationAttributes(ComponentScan.class.getName(), true));
+			//如果此类上标注了@ComponentScan注解，则将其设置的要检查的包路径添加到packages中
 			if (attributes != null) {
+				//将@ComponentScan注解中设置的value、basePackages、basePackageClasses三个属性的值添加到packages中
 				addPackages(packages, attributes.getStringArray("value"));
 				addPackages(packages, attributes.getStringArray("basePackages"));
 				addClasses(packages, attributes.getStringArray("basePackageClasses"));
+				//如果此注解未设置任何有关包名的属性，则直接将当前元数据对应的类所在的包名添加到packages中
 				if (packages.isEmpty()) {
 					packages.add(ClassUtils.getPackageName(metadata.getClassName()));
 				}
@@ -186,10 +209,13 @@ public class ConfigurationWarningsApplicationContextInitializer
 				}
 			}
 		}
-
+		/**获得给定要扫描的包中，有问题的包，并返回*/
 		private List<String> getProblematicPackages(Set<String> scannedPackages) {
+			//有问题的包的集合
 			List<String> problematicPackages = new ArrayList<>();
+			//遍历给定的要扫描的包数组
 			for (String scannedPackage : scannedPackages) {
+				//检查给定的包是否有问题，如果有则添加到problematicPackages中（即给定包名是null或者是空字符串或者在PROBLEM_PACKAGES中，则视为有问题的包名）
 				if (isProblematicPackage(scannedPackage)) {
 					problematicPackages.add(getDisplayName(scannedPackage));
 				}

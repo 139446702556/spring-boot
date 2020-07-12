@@ -44,10 +44,11 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
  * {@link ConfigurationClassPostProcessor} and Spring Boot.
  *
  * @author Phillip Webb
+ * 此类用于创建一个用于在ConfigurationClassPostProcessor和spring boot 之间共享的CachingMetadataReaderFactory bean对象
  */
 class SharedMetadataReaderFactoryContextInitializer
 		implements ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
-
+	/**创建的CachingMetadataReaderFactory的Bean的全类路名*/
 	public static final String BEAN_NAME = "org.springframework.boot.autoconfigure."
 			+ "internalCachingMetadataReaderFactory";
 
