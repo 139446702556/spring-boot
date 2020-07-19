@@ -36,10 +36,11 @@ import org.springframework.util.ObjectUtils;
  * @author Dave Syer
  * @author Eric Bottard
  * @since 1.0.0
+ * 容器上下文事件监听器，容器关闭的时候发出通知，如果父容器关闭，则子容器也一起关闭
  */
 public class ParentContextCloserApplicationListener
 		implements ApplicationListener<ParentContextAvailableEvent>, ApplicationContextAware, Ordered {
-
+	/**顺序*/
 	private int order = Ordered.LOWEST_PRECEDENCE - 10;
 
 	private ApplicationContext context;
@@ -56,11 +57,14 @@ public class ParentContextCloserApplicationListener
 
 	@Override
 	public void onApplicationEvent(ParentContextAvailableEvent event) {
+		//向父容器添加监听器，监听父容器的关闭事件
 		maybeInstallListenerInParent(event.getApplicationContext());
 	}
 
 	private void maybeInstallListenerInParent(ConfigurableApplicationContext child) {
+		//如果child是当前容器，并且其父类容器是ConfigurableApplicationContext类型
 		if (child == this.context && child.getParent() instanceof ConfigurableApplicationContext) {
+			//向父容器中添加监听器，来监听父容器的关闭事件
 			ConfigurableApplicationContext parent = (ConfigurableApplicationContext) child.getParent();
 			parent.addApplicationListener(createContextCloserListener(child));
 		}
@@ -71,6 +75,7 @@ public class ParentContextCloserApplicationListener
 	 * still enforces the use of a weak reference.
 	 * @param child the child context
 	 * @return the {@link ContextCloserListener} to use
+	 * 根据当前上下文对象创建一个ContextCloserListener类型监听器，并返回
 	 */
 	protected ContextCloserListener createContextCloserListener(ConfigurableApplicationContext child) {
 		return new ContextCloserListener(child);
@@ -78,6 +83,7 @@ public class ParentContextCloserApplicationListener
 
 	/**
 	 * {@link ApplicationListener} to close the context.
+	 * 监听父容器关闭时，关闭当前自己的容器
 	 */
 	protected static class ContextCloserListener implements ApplicationListener<ContextClosedEvent> {
 
@@ -89,8 +95,11 @@ public class ParentContextCloserApplicationListener
 
 		@Override
 		public void onApplicationEvent(ContextClosedEvent event) {
+			//获取当前监听器上下文
 			ConfigurableApplicationContext context = this.childContext.get();
+			//如果context存在，并且给定event事件的上下文是context的父类上下文，并且context处于活跃状态中的话，则对context进行关闭
 			if ((context != null) && (event.getApplicationContext() == context.getParent()) && context.isActive()) {
+				//关闭当前容器
 				context.close();
 			}
 		}

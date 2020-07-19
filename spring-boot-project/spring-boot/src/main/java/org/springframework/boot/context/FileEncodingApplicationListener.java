@@ -44,6 +44,8 @@ import org.springframework.core.env.ConfigurableEnvironment;
  * @author Dave Syer
  * @author Madhura Bhave
  * @since 1.0.0
+ * 在spring boot环境准备完成后运行，获取环境中的系统参数，检查当前系统环境的file.encoding和spring.mandatory-file-encoding设置的值是否一样
+ * 如果不一样则抛出异常，如果没有配置spring.mandatory-file-encoding则不进行检查
  */
 public class FileEncodingApplicationListener
 		implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
@@ -57,12 +59,19 @@ public class FileEncodingApplicationListener
 
 	@Override
 	public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
+		//获取环境变量
 		ConfigurableEnvironment environment = event.getEnvironment();
+		//检测当前事件环境中是否设置了spring.mandatory-file-encoding属性，如果没设置，则不进行后续检测，直接返回
 		if (!environment.containsProperty("spring.mandatory-file-encoding")) {
 			return;
 		}
+		//如果设置了spring.mandatory-file-encoding环境变量属性，则进行后续检查
+		//获取系统属性中file.encoding属性的值
 		String encoding = System.getProperty("file.encoding");
+		//获取环境变量中spring.mandatory-file-encoding属性的值
 		String desired = environment.getProperty("spring.mandatory-file-encoding");
+		//如果系统变量中存在file.encoding属性，并且spring.mandatory-file-encoding环境变量值和file.encoding系统属性值不相等
+		//则继续相关错误信息到日志中，并抛出异常
 		if (encoding != null && !desired.equalsIgnoreCase(encoding)) {
 			if (logger.isErrorEnabled()) {
 				logger.error("System property 'file.encoding' is currently '" + encoding + "'. It should be '" + desired

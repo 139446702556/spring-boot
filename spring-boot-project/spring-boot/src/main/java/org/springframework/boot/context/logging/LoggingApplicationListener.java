@@ -88,6 +88,7 @@ import org.springframework.util.StringUtils;
  * @author HaiTao Zhang
  * @since 2.0.0
  * @see LoggingSystem#get(ClassLoader)
+ * 实现根据配置初始化日志系统Logger
  */
 public class LoggingApplicationListener implements GenericApplicationListener {
 

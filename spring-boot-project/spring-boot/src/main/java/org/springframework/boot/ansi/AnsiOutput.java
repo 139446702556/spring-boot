@@ -165,22 +165,26 @@ public abstract class AnsiOutput {
 	/**
 	 * Possible values to pass to {@link AnsiOutput#setEnabled}. Determines when to output
 	 * ANSI escape sequences for coloring application output.
+	 * ansi的开关
 	 */
 	public enum Enabled {
 
 		/**
 		 * Try to detect whether ANSI coloring capabilities are available. The default
 		 * value for {@link AnsiOutput}.
+		 * 默认值，自动探测，根据是否支持ansi的功能，来判断是否要彩色输出
 		 */
 		DETECT,
 
 		/**
 		 * Enable ANSI-colored output.
+		 * 总是开启ansi的彩色输出
 		 */
 		ALWAYS,
 
 		/**
 		 * Disable ANSI-colored output.
+		 * 禁用ansi的彩色输出
 		 */
 		NEVER
 

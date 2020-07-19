@@ -53,17 +53,23 @@ public class DelegatingApplicationListener implements ApplicationListener<Applic
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
+		//ApplicationEnvironmentPreparedEvent类型事件
 		if (event instanceof ApplicationEnvironmentPreparedEvent) {
+			//从环境变量中获取PROPERTY_NAME属性对应的值对应的监听器们
 			List<ApplicationListener<ApplicationEvent>> delegates = getListeners(
 					((ApplicationEnvironmentPreparedEvent) event).getEnvironment());
+			//如果未设置，则直接返回
 			if (delegates.isEmpty()) {
 				return;
 			}
+			//实例化SimpleApplicationEventMulticaster对象
 			this.multicaster = new SimpleApplicationEventMulticaster();
+			//遍历此委托监听器代理的监听器集合，将其添加到multicaster中
 			for (ApplicationListener<ApplicationEvent> listener : delegates) {
 				this.multicaster.addApplicationListener(listener);
 			}
 		}
+		//在监听器集合中多播当前发生的事件
 		if (this.multicaster != null) {
 			this.multicaster.multicastEvent(event);
 		}
